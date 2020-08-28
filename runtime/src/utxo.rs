@@ -471,32 +471,6 @@ mod tests {
 		});
 	}
 
-	#[test]
-	fn attack_with_missing_account() {
-		let (mut test_ext, alice_pub_key, karl_pub_key) = new_test_ext_and_keys();
-		test_ext.execute_with(|| {
-			// Construct a transaction that consumes a bogus input, and sends 50 tokens to Alice.
-			let mut transaction = Transaction {
-				inputs: vec![TransactionInput {
-					// @apopiak outpoint is supposed to be a utxo hash, not a pubkey.
-					// Karl's key works because it happens to be the same number of bits.
-					outpoint: H256::from(karl_pub_key),
-					sigscript: H512::zero(),
-				}],
-				outputs: vec![TransactionOutput {
-					value: 50,
-					pubkey: H256::from(alice_pub_key),
-				}],
-			};
-
-			// Alice signs the transaction
-			let alice_signature = sp_io::crypto::sr25519_sign(SR25519, &alice_pub_key, &transaction.encode()).unwrap();
-			transaction.inputs[0].sigscript = H512::from(alice_signature);
-
-
-			assert_noop!(Utxo::spend(Origin::signed(0), transaction), "missing inputs");
-		});
-	}
 
 	#[test]
 	fn attack_with_sending_to_own_account() {
@@ -505,7 +479,7 @@ mod tests {
 			// Karl wants to send himself a new utxo of value 50 out of thin air.
 			let mut transaction = Transaction {
 				inputs: vec![TransactionInput {
-					outpoint: H256::from(karl_pub_key),
+					outpoint: H256::zero(),
 					sigscript: H512::zero(),
 				}],
 				outputs: vec![TransactionOutput {
