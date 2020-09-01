@@ -471,7 +471,6 @@ mod tests {
 		});
 	}
 
-
 	#[test]
 	fn attack_with_sending_to_own_account() {
 		let (mut test_ext, _alice, karl_pub_key) = new_test_ext_and_keys();
